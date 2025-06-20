@@ -444,8 +444,6 @@ footer .social a:hover{
     }
 }
 
-
-/* Para celulares e dispositivos menores */
 @media (max-width: 895px) {
     #menu-icon {
         display: block;
