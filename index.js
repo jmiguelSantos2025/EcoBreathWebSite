@@ -5,7 +5,7 @@
 
             "Oxigênio",
 
-            "Feira Tecnologica",
+            "Feira Tecnológica",
             
             "Matias Machline"
         ],
