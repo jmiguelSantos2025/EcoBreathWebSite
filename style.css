@@ -267,8 +267,9 @@ section{
 
     flex: 1 1 40rem;
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     align-items: center;
+    gap: 3;
     justify-content: center;
     background: white ;
     padding: 3rem 2rem 4rem;
@@ -277,6 +278,11 @@ section{
     text-align: center;
     cursor: pointer;
     transition: 0.4s ease;
+}
+.modalidades-container > div {
+    flex: 1;
+    min-width: 300px;
+    max-width: 600px;
 }
 .verao{
     padding: 2rem;
@@ -288,6 +294,8 @@ section{
     border: #100069 2px solid 1,5rem;
     border-radius: 1.5rem;
     padding: 2rem;
+    justify-content: center;
+    align-items: center;
 }
 .verao:hover{
     border-color: #0d017e;
@@ -313,14 +321,16 @@ section{
 
 .inverno{
     padding: 2rem;
-    align-self: baseline;
+    align-self: center;
     font-size: 2.6rem;
     font-weight: 700;
     margin-bottom: 1rem;
     width: 50%;
     border: #100069 2px solid 1,5rem;
     border-radius: 1.5rem;
-    padding: 8px;
+    padding: 2rem;
+    justify-content: center;
+    align-items: center;
 }
 .inverno:hover{
     border-color: #0d017e;
@@ -335,6 +345,8 @@ section{
     padding: 8px;
     border-radius: 1.5rem;
     transition: 0.3s ease;
+     justify-content: center;
+    align-items: center;
 }
 .inverno li{
     padding: 2.5 rem;
@@ -431,8 +443,8 @@ footer .social a:hover{
 
     .home-circle-1,
     .home-circle-2 {
-        width: 30vw;
-        height: 30vw;
+        width: 1vw;
+        height: 1vw;
     }
 
     .home-circle-1 {
@@ -443,6 +455,8 @@ footer .social a:hover{
         top: 20rem;
     }
 }
+
+
 
 @media (max-width: 895px) {
     #menu-icon {
@@ -461,7 +475,6 @@ footer .social a:hover{
         width: 100%;
         background: white;
         border-bottom: 2px solid #240361;
-        border-left: none;
         border-radius: 0 0 2rem 2rem;
         display: none;
         padding: 2rem;
@@ -483,6 +496,7 @@ footer .social a:hover{
         color: #180e72;
     }
 
+
     .home {
         flex-direction: column-reverse;
         margin: 4rem 2rem;
@@ -490,11 +504,9 @@ footer .social a:hover{
     }
 
     .home-circle-1,
-    .home-circle-2 {
-        width: 55vw;
-        height: 55vw;
-        position: static;
-        margin: 2rem auto;
+    .home-circle-2,
+    .sobre-circle {
+        display: none;
     }
 
     .home-img {
@@ -520,16 +532,11 @@ footer .social a:hover{
         text-align: center;
     }
 
+
     .sobre {
         flex-direction: column-reverse;
         margin: 2rem;
         gap: 2rem;
-    }
-
-    .sobre-circle {
-        width: 52vw;
-        height: 52vw;
-        margin: auto;
     }
 
     .sobre-content {
@@ -550,11 +557,16 @@ footer .social a:hover{
         border: 15px solid #180e72;
     }
 
+ 
     .modalidades {
         flex-direction: column;
-        gap: 2rem;
-        padding: 1rem;
         align-items: center;
+        gap: 2rem;
+    }
+
+    .modalidades > div {
+        width: 90%;
+        max-width: 600px;
     }
 
     .modalidades h2 {
@@ -562,22 +574,6 @@ footer .social a:hover{
         text-align: center;
     }
 
-    .timeline-items::before {
-        left: 7px;
-    }
-
-    .timeline-item:nth-child(odd) {
-        padding-right: 0;
-    }
-
-    .timeline-item:nth-child(odd),
-    .timeline-item:nth-child(even) {
-        padding-left: 37px;
-    }
-
-    .timeline-dot {
-        left: 0;
-    }
 }
 
 @media (max-width: 480px) {
@@ -591,13 +587,6 @@ footer .social a:hover{
         height: 80vw;
     }
 
-    .home-circle-1,
-    .home-circle-2,
-    .sobre-circle {
-        width: 65vw;
-        height: 65vw;
-    }
-
     .navbar a {
         font-size: 1.8rem;
     }
@@ -606,6 +595,10 @@ footer .social a:hover{
         font-size: 4rem;
     }
 }
-@keyframes animated{
-    to {background-position-x: 260px;}
+
+/* Animação */
+@keyframes animated {
+    to {
+        background-position-x: 260px;
+    }
 }
