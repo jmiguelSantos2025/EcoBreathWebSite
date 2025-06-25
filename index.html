@@ -1,135 +1,1442 @@
 <!DOCTYPE html>
 <html lang="pt-br">
-  <head>
+<head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>EcoBreath</title>
-    <link rel="stylesheet" href="style.css" />
-    <link
-      href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css"
-      rel="stylesheet"
-    />
-  </head>
-  <body>
+    <title>EcoBreath - Purificação do Ar Inteligente</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #4A6FA5;   
+            --secondary-color: #166088; 
+            --accent-color: #4FC3F7;    
+            --dark-color: #0A2463;      
+            --light-color: #F8F9FA;     
+            --text-color: #2B2D42;      
+            --text-light: #6C757D;      
+            --highlight-color: #FF7E5F; 
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            color: var(--text-color);
+            background-color: var(--light-color);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        
+        #particleCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        }
+
+        
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 1rem 8%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+            background-color: rgba(255, 255, 255, 0.98);
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+        }
+
+        .header.scrolled {
+            padding: 0.8rem 8%;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .logo-img {
+            height: 40px;
+            width: auto;
+            transition: transform 0.3s ease;
+        }
+        .logo-ecoBreath {
+            height: 60px;
+            width: auto;
+            transition: transform 0.3s ease;
+        }
+
+        .logo-img:hover {
+            transform: scale(1.05);
+        }
+
+        .logo-text {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--dark-color);
+            text-decoration: none;
+            font-family: 'Montserrat', sans-serif;
+            transition: color 0.3s ease;
+        }
+
+        .logo-text span {
+            color: var(--primary-color);
+        }
+
+        .logo-text:hover {
+            color: var(--secondary-color);
+        }
+
+        #menu-icon {
+            font-size: 2.2rem;
+            color: var(--dark-color);
+            cursor: pointer;
+            display: none;
+            transition: transform 0.3s ease;
+        }
+
+        #menu-icon:hover {
+            transform: rotate(90deg);
+            color: var(--primary-color);
+        }
+
+        .navbar {
+            display: flex;
+            gap: 1.8rem;
+            align-items: center;
+        }
+
+        .navbar a {
+            position: relative;
+            font-size: 1rem;
+            font-weight: 500;
+            color: var(--dark-color);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .navbar a:hover,
+        .navbar a.active {
+            color: var(--primary-color);
+        }
+
+        .navbar a::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: -5px;
+            width: 0;
+            height: 2px;
+            background-color: var(--primary-color);
+            transition: width 0.3s ease;
+        }
+
+        .navbar a:hover::after,
+        .navbar a.active::after {
+            width: 100%;
+        }
+
+        .download-nav {
+            background-color: var(--primary-color);
+            color: white !important;
+            padding: 0.5rem 1.2rem;
+            border-radius: 50px;
+            transition: all 0.3s ease;
+        }
+
+        .download-nav:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(74, 111, 165, 0.3);
+        }
+
+        .download-nav::after {
+            display: none;
+        }
+
+
+        section {
+            min-height: 100vh;
+            padding: 7rem 8% 4rem;
+            display: flex;
+            align-items: center;
+        }
+
+        
+        .home {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 4rem;
+            
+        }
+
+        .home-content {
+            max-width: 600px;
+            z-index: 3;
+            flex-direction: "row";
+        }
+
+        .logo-title-container {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .logo-ecoBreath {
+            height: 60px;
+            width: auto;
+            transition: transform 0.3s ease;
+        }
+
+        .home h1 {
+            font-size: 3.2rem;
+            font-weight: 700;
+            margin-bottom: 0;
+            line-height: 1.2;
+            color: var(--dark-color);
+            font-family: 'Montserrat', sans-serif;
+        }
+
+
+        .home h1 span {
+            color: var(--primary-color);
+            position: relative;
+        }
+
+        .home h1 span::after {
+            content: '';
+            position: absolute;
+            bottom: 5px;
+            left: 0;
+            width: 100%;
+            height: 8px;
+            background-color: rgba(79, 195, 247, 0.3);
+            z-index: -1;
+            border-radius: 4px;
+        }
+
+        .text-animation {
+            font-size: 1.4rem;
+            color: var(--text-light);
+            margin-bottom: 2rem;
+            height: 2.5rem;
+        }
+
+        .home p {
+            font-size: 1.1rem;
+            margin-bottom: 2.5rem;
+            color: var(--text-light);
+        }
+
+        .home-buttons {
+            display: flex;
+            gap: 1.2rem;
+            align-items: center;
+            margin-top: 2rem;
+        }
+
+        .home-img {
+            position: relative;
+            width: 420px;
+            height: 420px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2;
+        }
+
+        .home-img::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            border-radius: 50%;
+            animation: pulse 6s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.05); opacity: 0.9; }
+        }
+
+        .home-img img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+            border: 10px solid white;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
+            position: relative;
+            transition: transform 0.5s ease;
+        }
+
+        .home-img:hover img {
+            transform: scale(1.02);
+        }
+
+        
+        .btn {
+            display: inline-block;
+            padding: 0.9rem 2rem;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border-radius: 50px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 20px rgba(74, 111, 165, 0.3);
+            border: none;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(74, 111, 165, 0.4);
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, var(--secondary-color), var(--primary-color));
+            z-index: -1;
+            transition: opacity 0.3s ease;
+            opacity: 0;
+        }
+
+        .btn:hover::before {
+            opacity: 1;
+        }
+
+        .download-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.7rem;
+            padding: 0.9rem 1.8rem;
+            background-color: var(--dark-color);
+            color: white;
+            border-radius: 50px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(10, 36, 99, 0.2);
+        }
+
+        .download-btn:hover {
+            background-color: var(--highlight-color);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(255, 126, 95, 0.3);
+        }
+
+       
+        .sobre {
+            position: relative;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 4rem;
+            background-color: white;
+        }
+
+        .sobre-img {
+            position: relative;
+            width: 480px;
+            height: 480px;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.1);
+            transition: transform 0.5s ease;
+        }
+
+        .sobre-img:hover {
+            transform: translateY(-10px);
+        }
+
+        .sobre-img img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+        .sobre-img:hover img {
+            transform: scale(1.05);
+        }
+
+        .sobre-content {
+            max-width: 600px;
+        }
+
+        .heading {
+            font-size: 2.3rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+            color: var(--dark-color);
+            font-family: 'Montserrat', sans-serif;
+            position: relative;
+            display: inline-block;
+        }
+
+        .heading::after {
+            content: '';
+            position: absolute;
+            bottom: 5px;
+            left: 0;
+            width: 100%;
+            height: 8px;
+            background-color: rgba(79, 195, 247, 0.3);
+            z-index: -1;
+            border-radius: 4px;
+        }
+
+        .heading span {
+            color: var(--primary-color);
+        }
+
+        .sobre p {
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+            color: var(--text-light);
+        }
+
+       
+        .modalidades {
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            background-color: var(--light-color);
+        }
+
+        .modalidades-container {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 2.5rem;
+            margin-top: 3rem;
+            width: 100%;
+        }
+
+        .verao, .inverno {
+            flex: 1;
+            min-width: 300px;
+            max-width: 500px;
+            background-color: white;
+            padding: 2.5rem;
+            border-radius: 20px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            text-align: left;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .verao {
+            border-top: 5px solid var(--primary-color);
+        }
+
+        .inverno {
+            border-top: 5px solid var(--accent-color);
+        }
+
+        .verao:hover, .inverno:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.1);
+        }
+
+        .modalidades h3 {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: var(--dark-color);
+            position: relative;
+            display: inline-block;
+        }
+
+        .modalidades h3::after {
+            content: '';
+            position: absolute;
+            bottom: 2px;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background-color: rgba(79, 195, 247, 0.3);
+            z-index: -1;
+            border-radius: 3px;
+        }
+
+        .modalidades li {
+            margin-bottom: 1rem;
+            padding-left: 1.5rem;
+            position: relative;
+            color: var(--text-light);
+            transition: color 0.3s ease;
+            list-style-type: none;
+        }
+
+        .modalidades li:hover {
+            color: var(--dark-color);
+        }
+
+        .modalidades li::before {
+            content: '•';
+            position: absolute;
+            left: 0;
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+
+     
+        .team {
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            background-color: white;
+        }
+
+        .team-container {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 2.5rem;
+            margin-top: 3rem;
+            width: 100%;
+        }
+
+        .team-member {
+            flex: 1;
+            min-width: 250px;
+            max-width: 300px;
+            background-color: var(--light-color);
+            padding: 2.5rem;
+            border-radius: 20px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .team-member::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+        }
+
+        .team-member:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.1);
+        }
+
+        .team-member img {
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 1.5rem;
+            border: 5px solid white;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .team-member:hover img {
+            transform: scale(1.05);
+        }
+
+        .team-member h3 {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--dark-color);
+        }
+
+        .team-member p {
+            color: var(--text-light);
+            font-size: 0.95rem;
+            margin-bottom: 0.3rem;
+        }
+
+        
+        .download {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 4rem;
+            background-color: var(--light-color);
+        }
+
+        .download-content {
+            max-width: 600px;
+        }
+
+        .app-features {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+            margin: 2.5rem 0;
+        }
+
+        .feature {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.03);
+            transition: all 0.3s ease;
+        }
+
+        .feature:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+        }
+
+        .feature i {
+            font-size: 1.5rem;
+            color: var(--primary-color);
+            width: 45px;
+            height: 45px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: rgba(74, 111, 165, 0.1);
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+
+        .feature:hover i {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .feature p {
+            color: var(--text-light);
+            font-size: 0.95rem;
+            transition: color 0.3s ease;
+        }
+
+        .feature:hover p {
+            color: var(--dark-color);
+        }
+
+        .requirements {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            margin-top: 1.5rem;
+        }
+
+        .download-image {
+            width: 280px;
+            height: 560px;
+            border-radius: 30px;
+            overflow: hidden;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.1);
+            transition: transform 0.5s ease;
+            position: relative;
+        }
+
+        .download-image:hover {
+            transform: translateY(-10px);
+        }
+
+        .download-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+       
+        .footer {
+            background-color: var(--dark-color);
+            color: white;
+            padding: 5rem 8% 3rem;
+            text-align: center;
+            position: relative;
+        }
+
+        .footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+        }
+
+        .social {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .social a {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 50px;
+            height: 50px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+
+        .social a:hover {
+            background-color: var(--primary-color);
+            transform: translateY(-5px) scale(1.1);
+        }
+
+        .social i {
+            font-size: 1.5rem;
+            color: white;
+        }
+
+        .list {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .list a {
+            color: white;
+            text-decoration: none;
+            transition: color 0.3s ease;
+            position: relative;
+        }
+
+        .list a:hover {
+            color: var(--accent-color);
+        }
+
+        .list a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background-color: var(--accent-color);
+            transition: width 0.3s ease;
+        }
+
+        .list a:hover::after {
+            width: 100%;
+        }
+
+        .copyright {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.7);
+            margin-top: 2rem;
+        }
+
+        .copyright i {
+            color: var(--highlight-color);
+            margin: 0 0.3rem;
+        }
+        .partners {
+        background-color: white;
+        padding: 5rem 8%;
+        text-align: center;
+    }
+    
+    .partners-container {
+        display: flex;
+        justify-content: space-between;
+        gap: 3rem;
+        margin-top: 3rem;
+        max-width: 1200px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    
+    .contact-info, .partners-logos {
+        flex: 1;
+        background-color: var(--light-color);
+        padding: 2.5rem;
+        border-radius: 20px;
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.05);
+        text-align: left;
+    }
+    
+    .contact-info h3, .partners-logos h3 {
+        font-size: 1.4rem;
+        margin-bottom: 1.5rem;
+        color: var(--dark-color);
+        position: relative;
+        display: inline-block;
+    }
+    
+    .contact-info h3::after, .partners-logos h3::after {
+        content: '';
+        position: absolute;
+        bottom: 2px;
+        left: 0;
+        width: 100%;
+        height: 5px;
+        background-color: rgba(79, 195, 247, 0.3);
+        z-index: -1;
+        border-radius: 3px;
+    }
+    
+    .contact-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .contact-item i {
+        font-size: 1.2rem;
+        color: var(--primary-color);
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: rgba(74, 111, 165, 0.1);
+        border-radius: 50%;
+    }
+    
+    .contact-item p {
+        color: var(--text-light);
+        font-size: 1rem;
+    }
+    
+    .logos-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.5rem;
+    }
+    
+    .partner-logo {
+        background-color: white;
+        padding: 1.5rem;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100px;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .partner-logo:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    }
+    
+    .partner-logo img {
+        max-width: 100%;
+        max-height: 80px;
+        filter: grayscale(100%);
+        opacity: 0.7;
+        transition: all 0.3s ease;
+    }
+    
+    .partner-logo:hover img {
+        filter: grayscale(0%);
+        opacity: 1;
+    }
+    .contact-icon-large {
+        width: 80px;
+        height: 80px;
+        background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.8rem;
+        margin: 0 auto 1.5rem;
+    }
+    
+    .team-member h3 {
+        margin-bottom: 0.5rem;
+    }
+    
+    .team-member p {
+        margin-bottom: 0.3rem;
+    }
+    
+    @media (max-width: 768px) {
+        .partners-container {
+            flex-direction: column;
+        }
+        
+        .logos-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+
+        
+        @media (max-width: 1200px) {
+            .home-img,
+            .sobre-img {
+                width: 380px;
+                height: 380px;
+            }
+            
+            .download-image {
+                width: 240px;
+                height: 480px;
+            }
+        }
+
+        @media (max-width: 992px) {
+            section {
+                padding: 6rem 5% 3rem;
+            }
+
+            .home,
+            .sobre,
+            .download {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .home-content,
+            .sobre-content,
+            .download-content {
+                max-width: 100%;
+                align-items: center;
+            }
+
+            .home-img,
+            .sobre-img,
+            .download-image {
+                margin-top: 3rem;
+                order: 2;
+            }
+
+            .navbar {
+                position: absolute;
+                top: 100%;
+                left: 0;
+                width: 100%;
+                padding: 1.5rem 5%;
+                background-color: white;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+                flex-direction: column;
+                gap: 1.5rem;
+                transform: translateY(-150%);
+                transition: transform 0.3s ease;
+            }
+
+            .navbar.active {
+                transform: translateY(0);
+            }
+
+            #menu-icon {
+                display: block;
+            }
+
+            .download-nav {
+                width: fit-content;
+                margin: 0 auto;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .home h1 {
+                font-size: 2.6rem;
+            }
+
+            .heading {
+                font-size: 2rem;
+            }
+
+            .home-img,
+            .sobre-img {
+                width: 320px;
+                height: 320px;
+            }
+
+            .modalidades-container,
+            .app-features {
+                grid-template-columns: 1fr;
+            }
+
+            .download-image {
+                width: 200px;
+                height: 400px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            section {
+                padding: 5rem 3% 2rem;
+            }
+
+            .header {
+                padding: 0.8rem 5%;
+            }
+
+            .logo-img {
+                height: 35px;
+            }
+
+            .logo-text {
+                font-size: 1.1rem;
+            }
+
+            .home h1 {
+                font-size: 2.2rem;
+            }
+
+            .text-animation {
+                font-size: 1.2rem;
+            }
+
+            .home-buttons {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+
+            .btn, .download-btn {
+                padding: 0.8rem 1.8rem;
+                font-size: 0.95rem;
+                width: 100%;
+                text-align: center;
+            }
+        }
+
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .fade-in {
+            opacity: 0;
+            animation: fadeIn 1s ease forwards;
+        }
+
+        .delay-1 {
+            animation-delay: 0.2s;
+        }
+
+        .delay-2 {
+            animation-delay: 0.4s;
+        }
+
+        .delay-3 {
+            animation-delay: 0.6s;
+        }
+
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
+
+        .floating {
+            animation: float 4s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body>
     <canvas id="particleCanvas"></canvas>
     <header class="header">
-     <a href="#home"> <img src="2.svg" alt="logo_ecobreath"></a>
-      <a href="#home" class="logo"  id="arttext" > Projeto <span>EcoBreath</span> </a>
-      <i class="bx bx-menu" id="menu-icon"></i>
-      <nav class="navbar">
-        <a href="#home">Home</a>
-        <a href="#sobre">Sobre</a>
-        <a href="#modalidades">Objetivos</a>
-      </nav>
+        <div class="logo-container">
+            <img src="3.svg" alt="logo_ecobreath" class="logo-ecoBreath">
+             <img src="2.svg" alt="logo_ecobreath" class="logo-img">
+            <a href="#home" class="logo-text">Eco<span>Breath</span></a>
+        </div>
+        <i class="bx bx-menu" id="menu-icon"></i>
+        <nav class="navbar">
+            <a href="#home">Home</a>
+            <a href="#sobre">Sobre</a>
+            <a href="#modalidades">Objetivos</a>
+            <a href="#equipe">Equipe</a>
+            <a href="#parcerias">Parcerias</a>
+            <a href="#download" class="download-nav">Download APP</a>
+        </nav>
     </header>
 
-    <section class="home" id="home">
-      <div class="home-circle-1"></div>
-      <div class="home-circle-2"></div>
+     <section class="home" id="home">
+        <div class="home-content fade-in">
+            <div class="logo-title-container">
+                <img src="3.svg" alt="logo_ecobreath" class="logo-ecoBreath">
+                <h1>Eco<span>Breath</span></h1>
+            </div>
+            <h3 class="text-animation">
+                <span class="typewriter-text"></span>
+            </h3>
+            <p class="delay-1 fade-in">Tecnologia avançada para purificação do ar em ambientes internos, transformando CO₂ em oxigênio puro.</p>
+            
+            <div class="home-buttons delay-2 fade-in">
+                <a href="#sobre" class="btn">Saiba mais</a>
+                <a href="#download" class="download-btn">
+                    <i class="fas fa-download"></i> Baixar APP
+                </a>
+            </div>
+        </div>
 
-      <div class="home-content">
-        <h1>Eco<span>Breath</span></h1>
-        <h3 class="text-animation">
-         <span class="typewriter-text"></span>
-        </h3>
-
-        <a href="#" class="btn">Saiba mais</a>
-      </div>
-
-      <div class="home-img">
-        <img src="floral.jpg" alt="" />
-      </div>
+        <div class="home-img delay-3 fade-in floating">
+            <img src="floral.jpg" alt="Dispositivo EcoBreath" />
+        </div>
     </section>
 
+
     <section class="sobre" id="sobre">
-      <div class="sobre-circle"></div>
+        <div class="sobre-img fade-in">
+            <img src="prototipe.jpg" alt="Protótipo EcoBreath" />
+        </div>
 
-      <div class="sobre-img">
-        <img src="prototipe.jpg" alt="" />
-      </div>
-
-      <div class="sobre-content">
-        <h2 class="heading">Sobre <span>o projeto</span></h2>
-
-        <p>
-          Este estudo apresenta o desenvolvimento de um sistema automatizado voltado para 
-            a melhoria da qualidade do ar respirável em ambientes internos, fundamentado na 
-            incorporação de um reator fotocatalítico. Este dispositivo emprega processos 
-            oxidativos avançados baseados em dióxido de titânio (TiO₂) para promover a captura 
-            de dióxido de carbono (CO₂), convertendo-o em oxigênio. A implementação deste 
-            sistema visa mitigar o aumento da incidência de doenças respiratórias associadas à 
-            má qualidade do ar em espaços fechados. O objetivo geral desta pesquisa é 
-            desenvolver e analisar a viabilidade técnica de um sistema automatizado baseado 
-            em fotocatálise, capaz de contribuir para a purificação do ar em ambientes internos, 
-            com foco na redução de agentes poluentes prejudiciais à saúde humana. 
-        </p>
-
-        <a href="#" class="btn">Leia mais</a>
-      </div>
+        <div class="sobre-content">
+            <h2 class="heading fade-in">Sobre <span>o projeto</span></h2>
+            <p class="fade-in delay-1">Este estudo apresenta o desenvolvimento de um sistema automatizado voltado para 
+                a melhoria da qualidade do ar respirável em ambientes internos, fundamentado na 
+                incorporação de um reator fotocatalítico. Este dispositivo emprega processos 
+                oxidativos avançados baseados em dióxido de titânio (TiO₂) para promover a captura 
+                de dióxido de carbono (CO₂), convertendo-o em oxigênio.</p>
+            <p class="fade-in delay-2">A implementação deste sistema visa mitigar o aumento da incidência de doenças 
+                respiratórias associadas à má qualidade do ar em espaços fechados. O objetivo geral 
+                desta pesquisa é desenvolver e analisar a viabilidade técnica de um sistema automatizado 
+                baseado em fotocatálise, capaz de contribuir para a purificação do ar em ambientes internos, 
+                com foco na redução de agentes poluentes prejudiciais à saúde humana.</p>
+            <a href="#modalidades" class="btn delay-3 fade-in">Nossos Objetivos</a>
+        </div>
     </section>
 
     <section class="modalidades" id="modalidades">
-      <h2 class="heading">Objetivos</h2>
+        <h2 class="heading fade-in">Objetivos</h2>
 
-      <div class="modalidades-container">
-        <div class="verao">
-          <h3>Geral</h3>
-          <li>Desenvolver um dispositivo capaz de capturar dióxido de carbono (CO₂)
-             e transformá-lo em oxigênio (O₂) por meio de fotocatálise, visando melhorar
-              a qualidade do ar em ambientes fechados. O sistema também realiza o monitoramento em tempo real
-              da qualidade do ar, disponibilizando os dados por meio de um aplicativo.</li>
-
-          <a href="#" class="btn">Leia mais</a>
-          
+        <div class="modalidades-container">
+            <div class="verao fade-in delay-1">
+                <h3>Geral</h3>
+                <li>Desenvolver um dispositivo capaz de capturar dióxido de carbono (CO₂)
+                    e transformá-lo em oxigênio (O₂) por meio de fotocatálise, visando melhorar
+                    a qualidade do ar em ambientes fechados.</li>
+                <li>Implementar um sistema de monitoramento em tempo real da qualidade do ar.</li>
+                <li>Disponibilizar os dados coletados por meio de um aplicativo móvel intuitivo.</li>
+                <li>Garantir que o sistema seja energeticamente eficiente e sustentável.</li>
+            </div>
+            
+            <div class="inverno fade-in delay-2">
+                <h3>Específicos</h3>
+                <li>Revisar as tecnologias existentes relacionadas a purificação do ar</li>
+                <li>Desenvolver o circuito eletrônico e a arquitetura de software</li>
+                <li>Criar a modelagem mecânica do dispositivo</li>
+                <li>Implementar o reator fotocatalítico com TiO₂</li>
+                <li>Desenvolver o aplicativo móvel para monitoramento</li>
+                <li>Validar o desempenho do protótipo em diferentes condições ambientais</li>
+                <li>Otimizar o consumo energético do sistema</li>
+            </div>
         </div>
-          <div class="inverno">
-            <h3>Específicos</h3>
-            <li> Revisar as tecnologias existentes relacionadas a purificação do ar; </li>
-            <li>Desenvolver o circuito eletrônico;</li>
-            <li>Desenvolver a modelagem mecânica;</li>
-            <li>Validar o desempenho do protótipo em diferentes condições ambientais. </li>
-  
-            <a href="#" class="btn">Leia mais</a>
-          </div>
-
-      </div>
     </section>
 
+    <section class="team" id="equipe">
+        <h2 class="heading fade-in">Nossa <span>Equipe</span></h2>
+        
+        <div class="team-container">
+            <div class="team-member fade-in delay-1">
+                <img src="JoaoMiguel.jpg" alt="Foto de João Miguel">
+                <h3>Tec. João Miguel</h3>
+                <p>Pesquisador do Projeto</p>
+                <p>Técnico em informática</p>
+            </div>
+            
+            <div class="team-member fade-in delay-2">
+                <img src="AbrahamHenrique.jpg" alt="Foto de Abraham Henrique">
+                <h3>Tec. Abraham Guzmán</h3>
+                <p>Pesquisador do Projeto</p>
+                <p>Técnico em Mecatrônica</p>
+            </div>
+            
+            <div class="team-member fade-in delay-3">
+                <img src="MarcosGabriel.jpg" alt="Foto de Marcos Rocha">
+                <h3>Tec. Marcos Rocha</h3>
+                <p>Pequisador do Projeto</p>
+                <p>Técnico em Mecatrônica</p>
+            </div>
+            
+            </div>
+        </div>
+    </section>
+    <section class="team" id="parcerias">
+    <h2 class="heading fade-in">Parcerias <span>& Contato</span></h2>
+    
+    <div class="contact-container fade-in delay-1">
+        <div class="team-container">
+        
+            <div class="team-member">
+                <div class="contact-icon-large">
+                    <i class="fas fa-envelope"></i>
+                </div>
+                <h3>Email</h3>
+                <p>projeto.ecobreath@gmail.com</p>
+            </div>
+            
+            <div class="team-member">
+                <div class="contact-icon-large">
+                    <i class="fas fa-phone"></i>
+                </div>
+                <h3>Telefone</h3>
+                <p>+55 (92) 99508-6720</p>
+            </div>
+            
+            <div class="team-member">
+                <div class="contact-icon-large">
+                    <i class="fas fa-map-marker-alt"></i>
+                </div>
+                <h3>Localização</h3>
+                <p>Manaus, Amazonas - Brasil</p>
+            </div>
+        </div>
+    </div>
+    
+    
+</section>
 
+    <section class="download" id="download">
+        <div class="download-content fade-in">
+            <h2 class="heading">Baixe nosso <span>Aplicativo</span></h2>
+            <p class="delay-1 fade-in">Controle e monitore a qualidade do ar em tempo real diretamente do seu smartphone.</p>
+            
+            <div class="app-features delay-2 fade-in">
+                <div class="feature">
+                    <i class="fas fa-chart-line"></i>
+                    <p>Monitoramento em tempo real</p>
+                </div>
+                <div class="feature">
+                    <i class="fas fa-bell"></i>
+                    <p>Alertas de qualidade do ar</p>
+                </div>
+                <div class="feature">
+                    <i class="fas fa-history"></i>
+                    <p>Histórico de dados</p>
+                </div>
+                <div class="feature">
+                    <i class="fas fa-cog"></i>
+                    <p>Controle remoto do dispositivo</p>
+                </div>
+            </div>
+            
+            <a href="ecobreath_app.apk" download class="btn download-btn delay-3 fade-in">
+                <i class="fas fa-download"></i> Baixar APK (v1.0.0)
+            </a>
+            
+            <p class="requirements delay-3 fade-in">Requisitos: Android 8.0 ou superior</p>
+        </div>
+        
+        <div class="download-image delay-3 fade-in floating">
+            <img src="https://via.placeholder.com/300x600/e4f0f5/166088?text=EcoBreath+App" alt="App EcoBreath Screenshot">
+        </div> 
+    </section>
+    
    
+    
+
     <footer class="footer">
         <div class="social">
-          <a href="https://www.instagram.com/projeto.ecobreath" target="_blank"
-            ><i class="bx bxl-instagram"></i
-          ></a>
-
+            <a href="https://www.instagram.com/projeto.ecobreath" target="_blank">
+                <i class="bx bxl-instagram"></i>
+            </a>
+            <a href="https://wa.me/5592995086720?text=Olá,%20gostaria%20de%20saber%20mais%20sobre%20o%20projeto%20EcoBreath?" target="_blank">
+                <i class="bx bxl-whatsapp"></i>
+            </a>
         </div>
 
         <ul class="list">
-            <li>
-                <a href="#home">Home</a>
-            </li>
-            <li>
-                <a href="#sobre">Sobre</a>
-            </li>
-            <li>
-                <a href="#modalidades">Objetivos</a>
-            </li>
+            <li><a href="#home">Home</a></li>
+            <li><a href="#sobre">Sobre</a></li>
+            <li><a href="#modalidades">Objetivos</a></li>
+            <li><a href="#equipe">Equipe</a></li>
+            <li><a href="#parcerias">Parcerias</a></li>
+            <li><a href="#download">Download</a></li>
         </ul>
 
         <p class="copyright">
-            © abrahamgc81 All rights reserved. Licensed
+            © 2025 Projeto EcoBreath. Todos os direitos reservados.<br>
+            Desenvolvido com <i class="fas fa-heart"></i> por nossa equipe.
         </p>
-
     </footer>
 
-    <script
-      src="https://cdnjs.cloudflare.com/ajax/libs/typed.js/2.1.0/typed.umd.js"
-      integrity="sha512-+2pW8xXU/rNr7VS+H62aqapfRpqFwnSQh9ap6THjsm41AxgA0MhFRtfrABS+Lx2KHJn82UOrnBKhjZOXpom2LQ=="
-      crossorigin="anonymous"
-      referrerpolicy="no-referrer"
-    ></script>
-
-    <script src="index.js"></script>
-  </body>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/typed.js/2.1.0/typed.umd.js"></script>
+    <script>
+     
+        const menuIcon = document.getElementById('menu-icon');
+        const navbar = document.querySelector('.navbar');
+        
+        menuIcon.addEventListener('click', () => {
+            navbar.classList.toggle('active');
+        });
+        
+        
+        document.querySelectorAll('.navbar a').forEach(link => {
+            link.addEventListener('click', () => {
+                navbar.classList.remove('active');
+            });
+        });
+        
+     
+        window.addEventListener('scroll', () => {
+            const header = document.querySelector('.header');
+            header.classList.toggle('scrolled', window.scrollY > 50);
+        });
+        
+        
+        const typed = new Typed('.typewriter-text', {
+            strings: ['Ar puro, vida saudável.', 'Tecnologia que respira.', 'Inovação para seu bem-estar.'],
+            typeSpeed: 50,
+            backSpeed: 30,
+            loop: true,
+            showCursor: true,
+            cursorChar: '|',
+        });
+        
+      
+        const canvas = document.getElementById('particleCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        
+        const particles = [];
+        const particleCount = window.innerWidth < 768 ? 50 : 100;
+        
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 3 + 1;
+                this.speedX = Math.random() * 1 - 0.5;
+                this.speedY = Math.random() * 1 - 0.5;
+                this.color = `rgba(22, 96, 136, ${Math.random() * 0.5 + 0.1})`;
+            }
+            
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                
+                if (this.x < 0 || this.x > canvas.width) this.speedX *= -1;
+                if (this.y < 0 || this.y > canvas.height) this.speedY *= -1;
+            }
+            
+            draw() {
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+        
+        function initParticles() {
+            for (let i = 0; i < particleCount; i++) {
+                particles.push(new Particle());
+            }
+        }
+        
+        function animateParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            for (let i = 0; i < particles.length; i++) {
+                particles[i].update();
+                particles[i].draw();
+                
+                for (let j = i + 1; j < particles.length; j++) {
+                    const dx = particles[i].x - particles[j].x;
+                    const dy = particles[i].y - particles[j].y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (distance < 100) {
+                        ctx.strokeStyle = `rgba(22, 96, 136, ${1 - distance / 100})`;
+                        ctx.lineWidth = 0.5;
+                        ctx.beginPath();
+                        ctx.moveTo(particles[i].x, particles[i].y);
+                        ctx.lineTo(particles[j].x, particles[j].y);
+                        ctx.stroke();
+                    }
+                }
+            }
+            
+            requestAnimationFrame(animateParticles);
+        }
+        
+        initParticles();
+        animateParticles();
+        
+       
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+        
+       
+        const fadeElements = document.querySelectorAll('.fade-in');
+        
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('animate');
+                }
+            });
+        }, {
+            threshold: 0.1
+        });
+        
+        fadeElements.forEach(element => {
+            observer.observe(element);
+        });
+        
+    
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                const targetId = this.getAttribute('href');
+                if (targetId === '#') return;
+                
+                const targetElement = document.querySelector(targetId);
+                if (targetElement) {
+                    window.scrollTo({
+                        top: targetElement.offsetTop - 80,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
 </html>
