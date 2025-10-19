@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Monitoramento - EcoBreath</title>
+    <link rel="icon" href="2.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.10.0/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+    <style>
+        /* ===== Seu CSS permanece inalterado ===== */
+        :root {
+            --primary-color: #4A6FA5;   
+            --secondary-color: #166088; 
+            --accent-color: #4FC3F7;    
+            --dark-color: #0A2463;      
+            --light-color: #F8F9FA;     
+            --text-color: #2B2D42;      
+            --text-light: #6C757D;      
+            --highlight-color: #FF7E5F; 
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; scroll-behavior: smooth; }
+        body { font-family: 'Poppins', sans-serif; color: var(--text-color); background-color: var(--light-color); overflow-x: hidden; line-height: 1.6; }
+        #particleCanvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); }
+        .header { position: fixed; top: 0; left: 0; width: 100%; padding: 1rem 8%; display: flex; justify-content: space-between; align-items: center; z-index: 100; background-color: rgba(255, 255, 255, 0.98); box-shadow: 0 2px 20px rgba(0, 0, 0, 0.08); transition: all 0.3s ease; }
+        .header.scrolled { padding: 0.8rem 8%; }
+        .logo-container { display: flex; align-items: center; gap: 0.5rem; }
+        .logo-img { height: 40px; width: auto; transition: transform 0.3s ease; }
+        .logo-ecoBreath { height: 60px; width: auto; transition: transform 0.3s ease; }
+        .logo-img:hover { transform: scale(1.05); }
+        .logo-text { font-size: 1.3rem; font-weight: 700; color: var(--dark-color); text-decoration: none; font-family: 'Montserrat', sans-serif; transition: color 0.3s ease; }
+        .logo-text span { color: var(--primary-color); }
+        .logo-text:hover { color: var(--secondary-color); }
+        #menu-icon { font-size: 2.2rem; color: var(--dark-color); cursor: pointer; display: none; transition: transform 0.3s ease; }
+        #menu-icon:hover { transform: rotate(90deg); color: var(--primary-color); }
+        .navbar { display: flex; gap: 1.8rem; align-items: center; }
+        .navbar a { position: relative; font-size: 1rem; font-weight: 500; color: var(--dark-color); text-decoration: none; transition: color 0.3s ease; }
+        .navbar a:hover, .navbar a.active { color: var(--primary-color); }
+        .navbar a::after { content: ''; position: absolute; left: 0; bottom: -5px; width: 0; height: 2px; background-color: var(--primary-color); transition: width 0.3s ease; }
+        .navbar a:hover::after, .navbar a.active::after { width: 100%; }
+        .monitor-nav { background-color: var(--primary-color); color: white !important; padding: 0.5rem 1.2rem; border-radius: 50px; transition: all 0.3s ease; }
+        .monitor-nav:hover { background-color: var(--secondary-color); transform: translateY(-2px); box-shadow: 0 4px 8px rgba(74, 111, 165, 0.3); }
+        .monitor-nav::after { display: none; }
+        section { min-height: 100vh; padding: 7rem 8% 4rem; display: flex; align-items: center; }
+        .monitor { flex-direction: column; align-items: center; text-align: center; background-color: var(--light-color); }
+        .monitor-container { display: grid; grid-template-columns: 1fr 1fr; gap: 2.5rem; margin-top: 2rem; width: 100%; max-width: 1200px; }
+        .data-cards { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; }
+        .data-card { background-color: white; padding: 1.5rem; border-radius: 15px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05); transition: all 0.3s ease; text-align: center; position: relative; overflow: hidden; }
+        .data-card::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 5px; background: linear-gradient(90deg, var(--primary-color), var(--accent-color)); }
+        .data-card:hover { transform: translateY(-5px); box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1); }
+        .data-card i { font-size: 2.5rem; color: var(--primary-color); margin-bottom: 1rem; }
+        .data-card h3 { font-size: 1.2rem; font-weight: 600; margin-bottom: 0.5rem; color: var(--dark-color); }
+        .data-value { font-size: 2rem; font-weight: 700; color: var(--secondary-color); margin-bottom: 0.5rem; }
+        .data-unit { font-size: 1rem; color: var(--text-light); }
+        .data-timestamp { font-size: 0.8rem; color: var(--text-light); margin-top: 0.5rem; }
+        .webcam-section { background-color: white; padding: 2rem; border-radius: 15px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05); display: flex; flex-direction: column; gap: 1.5rem; }
+        .webcam-container { position: relative; width: 100%; height: 300px; border-radius: 10px; overflow: hidden; background-color: #f0f0f0; display: flex; align-items: center; justify-content: center; }
+        #webcam { width: 100%; height: 100%; object-fit: cover; }
+        .webcam-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
+        .people-counter { background-color: white; padding: 1.5rem; border-radius: 15px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05); text-align: center; transition: all 0.3s ease; }
+        .people-counter:hover { transform: translateY(-5px); box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1); }
+        .people-counter i { font-size: 2.5rem; color: var(--highlight-color); margin-bottom: 1rem; }
+        .people-counter h3 { font-size: 1.2rem; font-weight: 600; margin-bottom: 0.5rem; color: var(--dark-color); }
+        .people-count { font-size: 3rem; font-weight: 700; color: var(--highlight-color); }
+        .webcam-controls { display: flex; gap: 1rem; justify-content: center; }
+        .btn { display: inline-block; padding: 0.9rem 2rem; background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); color: white; border-radius: 50px; font-size: 0.95rem; font-weight: 600; text-decoration: none; transition: all 0.3s ease; box-shadow: 0 5px 20px rgba(74, 111, 165, 0.3); border: none; cursor: pointer; position: relative; overflow: hidden; z-index: 1; }
+        .btn:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(74, 111, 165, 0.4); }
+        .btn::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, var(--secondary-color), var(--primary-color)); z-index: -1; transition: opacity 0.3s ease; opacity: 0; }
+        .btn:hover::before { opacity: 1; }
+        .btn-secondary { background: var(--light-color); color: var(--text-color); box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05); }
+        .btn-secondary:hover { background: white; box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1); }
+        .heading { font-size: 2.3rem; font-weight: 700; margin-bottom: 2rem; color: var(--dark-color); font-family: 'Montserrat', sans-serif; position: relative; display: inline-block; }
+        .heading::after { content: ''; position: absolute; bottom: 5px; left: 0; width: 100%; height: 8px; background-color: rgba(79, 195, 247, 0.3); z-index: -1; border-radius: 4px; }
+        .heading span { color: var(--primary-color); }
+        .footer { background-color: var(--dark-color); color: white; padding: 5rem 8% 3rem; text-align: center; position: relative; }
+        .footer::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 5px; background: linear-gradient(90deg, var(--primary-color), var(--accent-color)); }
+        .social { display: flex; justify-content: center; gap: 1.5rem; margin-bottom: 2.5rem; }
+        .social a { display: flex; justify-content: center; align-items: center; width: 50px; height: 50px; background-color: rgba(255, 255, 255, 0.1); border-radius: 50%; transition: all 0.3s ease; }
+        .social a:hover { background-color: var(--primary-color); transform: translateY(-5px) scale(1.1); }
+        .social i { font-size: 1.5rem; color: white; }
+        .list { display: flex; justify-content: center; flex-wrap: wrap; gap: 1.5rem; margin-bottom: 2.5rem; }
+        .list a { color: white; text-decoration: none; transition: color 0.3s ease; position: relative; }
+        .list a:hover { color: var(--accent-color); }
+        .list a::after { content: ''; position: absolute; bottom: -5px; left: 0; width: 0; height: 2px; background-color: var(--accent-color); transition: width 0.3s ease; }
+        .list a:hover::after { width: 100%; }
+        .copyright { font-size: 0.9rem; color: rgba(255, 255, 255, 0.7); margin-top: 2rem; }
+        .copyright i { color: var(--highlight-color); margin: 0 0.3rem; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        .fade-in { opacity: 0; animation: fadeIn 1s ease forwards; }
+        .delay-1 { animation-delay: 0.2s; }
+        .delay-2 { animation-delay: 0.4s; }
+        .delay-3 { animation-delay: 0.6s; }
+        @media (max-width: 992px) { .monitor-container { grid-template-columns: 1fr; } .data-cards { order: 2; } .webcam-section { order: 1; } }
+        @media (max-width: 768px) { .data-cards { grid-template-columns: 1fr; } .navbar { position: absolute; top: 100%; left: 0; width: 100%; padding: 1.5rem 5%; background-color: white; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1); flex-direction: column; gap: 1.5rem; transform: translateY(-150%); transition: transform 0.3s ease; } .navbar.active { transform: translateY(0); } #menu-icon { display: block; } .monitor-nav { width: fit-content; margin: 0 auto; } }
+        @media (max-width: 576px) { section { padding: 5rem 3% 2rem; } .header { padding: 0.8rem 5%; } .logo-img { height: 35px; } .logo-text { font-size: 1.1rem; } .heading { font-size: 2rem; } }
+    </style>
+</head>
+<body>
+<canvas id="particleCanvas"></canvas>
+<header class="header">
+    <div class="logo-container">
+        <img src="3.svg" alt="logo_ecobreath" class="logo-ecoBreath">
+        <img src="2.svg" alt="logo_ecobreath" class="logo-img">
+        <a href="index.html" class="logo-text">Eco<span>Breath</span></a>
+    </div>
+    <i class="bx bx-menu" id="menu-icon"></i>
+    <nav class="navbar">
+        <a href="index.html">Home</a>
+        <a href="index.html#sobre">Sobre</a>
+        <a href="index.html#modalidades">Objetivos</a>
+        <a href="index.html#equipe">Equipe</a>
+        <a href="index.html#parcerias">Parcerias</a>
+        <a href="monitor.html" class="monitor-nav active">Monitoramento</a>
+    </nav>
+</header>
+
+<section class="monitor" id="monitor">
+    <h2 class="heading fade-in">Monitoramento <span>em Tempo Real</span></h2>
+    <div class="monitor-container">
+        <div class="data-cards fade-in delay-1">
+            <div class="data-card">
+                <i class="fas fa-wind"></i>
+                <h3>Qualidade do Ar</h3>
+                <div class="data-value" id="air-quality">--</div>
+                <div class="data-unit">IAQ</div>
+                <div class="data-timestamp" id="air-quality-time">--</div>
+            </div>
+            <div class="data-card">
+                <i class="fas fa-temperature-high"></i>
+                <h3>Temperatura</h3>
+                <div class="data-value" id="temperature">--</div>
+                <div class="data-unit">°C</div>
+                <div class="data-timestamp" id="temperature-time">--</div>
+            </div>
+            <div class="data-card">
+                <i class="fas fa-tint"></i>
+                <h3>Umidade</h3>
+                <div class="data-value" id="humidity">--</div>
+                <div class="data-unit">%</div>
+                <div class="data-timestamp" id="humidity-time">--</div>
+            </div>
+            <div class="data-card">
+                <i class="fas fa-cloud"></i>
+                <h3>CO₂</h3>
+                <div class="data-value" id="co2">--</div>
+                <div class="data-unit">ppm</div>
+                <div class="data-timestamp" id="co2-time">--</div>
+            </div>
+        </div>
+
+        <div class="webcam-section fade-in delay-2">
+            <h3>Monitoramento por IA</h3>
+            <div class="webcam-container">
+                <video id="webcam" autoplay playsinline></video>
+                <canvas id="webcam-overlay" class="webcam-overlay"></canvas>
+                <div id="webcam-placeholder" style="display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text-light);">
+                    <i class="fas fa-camera" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+                    <p>Webcam não iniciada</p>
+                </div>
+            </div>
+            <div class="webcam-controls">
+                <button id="start-webcam" class="btn"><i class="fas fa-play"></i> Iniciar Webcam</button>
+                <button id="stop-webcam" class="btn btn-secondary" disabled><i class="fas fa-stop"></i> Parar Webcam</button>
+            </div>
+            <div class="people-counter">
+                <i class="fas fa-users"></i>
+                <h3>Pessoas Detectadas</h3>
+                <div class="people-count" id="people-count">0</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<footer class="footer">
+    <div class="social">
+        <a href="https://www.instagram.com/projeto.ecobreath" target="_blank"><i class="bx bxl-instagram"></i></a>
+        <a href="https://wa.me/5592995086720?text=Olá,%20gostaria%20de%20saber%20mais%20sobre%20o%20projeto%20EcoBreath?" target="_blank"><i class="bx bxl-whatsapp"></i></a>
+    </div>
+    <ul class="list">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="index.html#sobre">Sobre</a></li>
+        <li><a href="index.html#modalidades">Objetivos</a></li>
+        <li><a href="index.html#equipe">Equipe</a></li>
+        <li><a href="index.html#parcerias">Parcerias</a></li>
+        <li><a href="monitor.html">Monitoramento</a></li>
+    </ul>
+    <p class="copyright">
+        © 2025 Projeto EcoBreath. Todos os direitos reservados.<br>
+        Desenvolvido com <i class="fas fa-heart"></i> por nossa equipe.
+    </p>
+</footer>
+
+<script>
+    // ===== Elementos =====
+    const menuIcon = document.getElementById('menu-icon');
+    const navbar = document.querySelector('.navbar');
+    const startWebcamBtn = document.getElementById('start-webcam');
+    const stopWebcamBtn = document.getElementById('stop-webcam');
+    const webcam = document.getElementById('webcam');
+    const webcamOverlay = document.getElementById('webcam-overlay');
+    const webcamPlaceholder = document.getElementById('webcam-placeholder');
+    const peopleCountElement = document.getElementById('people-count');
+    // 🔹 Eventos para iniciar e parar webcam
+startWebcamBtn.addEventListener('click', startWebcam);
+stopWebcamBtn.addEventListener('click', stopWebcam);
+
+
+    const airQualityElement = document.getElementById('air-quality');
+    const temperatureElement = document.getElementById('temperature');
+    const humidityElement = document.getElementById('humidity');
+    const co2Element = document.getElementById('co2');
+
+    const airQualityTimeElement = document.getElementById('air-quality-time');
+    const temperatureTimeElement = document.getElementById('temperature-time');
+    const humidityTimeElement = document.getElementById('humidity-time');
+    const co2TimeElement = document.getElementById('co2-time');
+
+    let stream = null;
+    let peopleCount = 0;
+    let model = null;
+    let detectionInterval = null;
+
+    // ===== Menu mobile =====
+    menuIcon.addEventListener('click', () => { navbar.classList.toggle('active'); });
+    window.addEventListener('scroll', () => { document.querySelector('.header').classList.toggle('scrolled', window.scrollY > 50); });
+
+    // ===== Partículas =====
+    const canvas = document.getElementById('particleCanvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    const particles = [];
+    const particleCount = window.innerWidth < 768 ? 50 : 100;
+
+    class Particle {
+        constructor() {
+            this.x = Math.random() * canvas.width;
+            this.y = Math.random() * canvas.height;
+            this.size = Math.random() * 3 + 1;
+            this.speedX = Math.random() * 1 - 0.5;
+            this.speedY = Math.random() * 1 - 0.5;
+            this.color = `rgba(22, 96, 136, ${Math.random() * 0.5 + 0.1})`;
+        }
+        update() { this.x += this.speedX; this.y += this.speedY; if (this.x < 0 || this.x > canvas.width) this.speedX *= -1; if (this.y < 0 || this.y > canvas.height) this.speedY *= -1; }
+        draw() { ctx.fillStyle = this.color; ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); ctx.fill(); }
+    }
+
+    function initParticles() { for (let i = 0; i < particleCount; i++) particles.push(new Particle()); }
+    function animateParticles() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        for (let i = 0; i < particles.length; i++) {
+            particles[i].update();
+            particles[i].draw();
+            for (let j = i + 1; j < particles.length; j++) {
+                const dx = particles[i].x - particles[j].x;
+                const dy = particles[i].y - particles[j].y;
+                const distance = Math.sqrt(dx*dx + dy*dy);
+                if (distance < 100) {
+                    ctx.strokeStyle = `rgba(22, 96, 136, ${1 - distance / 100})`;
+                    ctx.lineWidth = 0.5;
+                    ctx.beginPath();
+                    ctx.moveTo(particles[i].x, particles[i].y);
+                    ctx.lineTo(particles[j].x, particles[j].y);
+                    ctx.stroke();
+                }
+            }
+        }
+        requestAnimationFrame(animateParticles);
+    }
+
+    initParticles(); animateParticles();
+    window.addEventListener('resize', () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; });
+
+    // ===== Webcam & IA =====
+
+// Carrega o modelo COCO-SSD
+async function loadModel() {
+    model = await cocoSsd.load();
+    console.log("Modelo COCO-SSD carregado!");
+}
+
+// Detecta pessoas em tempo real, centralizando e ajustando a caixa
+async function detectPeople() {
+    if (!model || !webcam.srcObject) return;
+
+    const overlayCtx = webcamOverlay.getContext("2d");
+    overlayCtx.clearRect(0, 0, webcamOverlay.width, webcamOverlay.height);
+
+    const predictions = await model.detect(webcam);
+    let detectedCount = 0;
+
+    predictions.forEach(pred => {
+        if (pred.class === "person" && pred.score > 0.5) {
+            detectedCount++;
+
+            let [x, y, width, height] = pred.bbox;
+
+            // Ajuste para centralizar a pessoa e aumentar o bbox
+            const scaleFactor = 1.2; // aumenta a área da caixa
+            const centerX = x + width / 2;
+            const centerY = y + height / 2;
+            width *= scaleFactor;
+            height *= scaleFactor;
+            x = centerX - width / 2;
+            y = centerY - height / 2;
+
+            // Desenhar caixa elegante
+            overlayCtx.strokeStyle = "rgba(79, 195, 247, 0.9)";
+            overlayCtx.lineWidth = 4;
+            overlayCtx.shadowColor = "rgba(0,0,0,0.4)";
+            overlayCtx.shadowBlur = 10;
+            overlayCtx.beginPath();
+            overlayCtx.roundRect(x, y, width, height, 15);
+            overlayCtx.stroke();
+
+            // Label transparente
+            overlayCtx.fillStyle = "rgba(79, 195, 247, 0.3)";
+            overlayCtx.fillRect(x, y - 25, width, 25);
+
+            overlayCtx.font = "bold 16px Poppins";
+            overlayCtx.fillStyle = "#fff";
+            overlayCtx.fillText("Pessoa", x + 5, y - 7);
+        }
+    });
+
+    peopleCount = detectedCount;
+    peopleCountElement.textContent = peopleCount;
+}
+
+// Polyfill para roundRect (cantos arredondados)
+CanvasRenderingContext2D.prototype.roundRect = function (x, y, w, h, r) {
+    if (w < 2 * r) r = w / 2;
+    if (h < 2 * r) r = h / 2;
+    this.beginPath();
+    this.moveTo(x + r, y);
+    this.arcTo(x + w, y, x + w, y + h, r);
+    this.arcTo(x + w, y + h, x, y + h, r);
+    this.arcTo(x, y + h, x, y, r);
+    this.arcTo(x, y, x + w, y, r);
+    this.closePath();
+    return this;
+};
+
+// Inicia a webcam com IA
+async function startWebcam() {
+    try {
+        stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        webcam.srcObject = stream;
+        
+        webcam.style.display = "block";
+        webcamPlaceholder.style.display = "none";
+        // 🔹 Ajusta o canvas overlay para o tamanho do vídeo
+webcam.addEventListener('loadedmetadata', () => {
+    webcamOverlay.width = webcam.videoWidth;
+    webcamOverlay.height = webcam.videoHeight;
+});
+
+
+        startWebcamBtn.disabled = true;
+        stopWebcamBtn.disabled = false;
+
+        await loadModel();
+
+        detectionInterval = setInterval(detectPeople, 300); // Atualiza a cada 300ms
+    } catch (err) {
+        console.error("Erro ao acessar a webcam:", err);
+        alert("Não foi possível acessar a webcam. Verifique as permissões.");
+    }
+}
+
+// Para a webcam
+function stopWebcam() {
+    if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+        webcam.srcObject = null;
+        webcam.style.display = "none";
+        webcamPlaceholder.style.display = "flex";
+
+        startWebcamBtn.disabled = false;
+        stopWebcamBtn.disabled = true;
+
+        clearInterval(detectionInterval);
+        peopleCount = 0;
+        peopleCountElement.textContent = "0";
+    }
+}
+
+    // ===== Firebase =====
+    const firebaseConfig = {
+        apiKey: "SUA_API_KEY",
+        authDomain: "SEU_PROJETO.firebaseapp.com",
+        databaseURL: "https://SEU_PROJETO-default-rtdb.firebaseio.com",
+        projectId: "SEU_PROJETO",
+        storageBucket: "SEU_PROJETO.appspot.com",
+        messagingSenderId: "SEU_SENDER_ID",
+        appId: "SEU_APP_ID"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+
+    function fetchDataFromFirebase() {
+        const dataRef = database.ref('sensorData');
+        dataRef.on('value', (snapshot) => {
+            const data = snapshot.val();
+            if (data) {
+                if (data.airQuality !== undefined) { airQualityElement.textContent = data.airQuality.toFixed(1); airQualityTimeElement.textContent = formatTimestamp(data.timestamp); }
+                if (data.temperature !== undefined) { temperatureElement.textContent = data.temperature.toFixed(1); temperatureTimeElement.textContent = formatTimestamp(data.timestamp); }
+                if (data.humidity !== undefined) { humidityElement.textContent = data.humidity.toFixed(1); humidityTimeElement.textContent = formatTimestamp(data.timestamp); }
+                if (data.co2 !== undefined) { co2Element.textContent = data.co2.toFixed(0); co2TimeElement.textContent = formatTimestamp(data.timestamp); }
+            }
+        }, (error) => { console.error('Erro ao buscar dados:', error); });
+    }
+
+    function formatTimestamp(timestamp) { if (!timestamp) return '--'; const date = new Date(timestamp); return `${date.toLocaleDateString('pt-BR')} ${date.toLocaleTimeString('pt-BR')}`; }
+
+    fetchDataFromFirebase();
+
+    // ===== Simulação de dados =====
+    function simulateFirebaseData() {
+        setInterval(() => {
+            const simulatedData = {
+                airQuality: 85 + Math.random() * 15,
+                temperature: 22 + Math.random() * 5,
+                humidity: 45 + Math.random() * 20,
+                co2: 400 + Math.random() * 200,
+                timestamp: Date.now()
+            };
+            airQualityElement.textContent = simulatedData.airQuality.toFixed(1);
+            temperatureElement.textContent = simulatedData.temperature.toFixed(1);
+            humidityElement.textContent = simulatedData.humidity.toFixed(1);
+            co2Element.textContent = simulatedData.co2.toFixed(0);
+            const timeStr = formatTimestamp(simulatedData.timestamp);
+            airQualityTimeElement.textContent = timeStr;
+            temperatureTimeElement.textContent = timeStr;
+            humidityTimeElement.textContent = timeStr;
+            co2TimeElement.textContent = timeStr;
+        }, 5000);
+    }
+
+    simulateFirebaseData();
+</script>
+</body>
+</html>
