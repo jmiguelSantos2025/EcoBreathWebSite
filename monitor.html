@@ -16,7 +16,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
     <style>
-        /* ===== Seu CSS permanece inalterado ===== */
+        
         :root {
             --primary-color: #4A6FA5;   
             --secondary-color: #166088; 
@@ -176,6 +176,11 @@
                 <h3>Pessoas Detectadas</h3>
                 <div class="people-count" id="people-count">0</div>
             </div>
+            <div class="people-counter">
+                <i class="fas fa-users"></i>
+                <h3>Modo de Uso</h3>
+                <div class="people-count" id="people-mode">Desligado</div>
+            </div>
         </div>
     </div>
 </section>
@@ -200,7 +205,7 @@
 </footer>
 
 <script>
-    // ===== Elementos =====
+   
     const menuIcon = document.getElementById('menu-icon');
     const navbar = document.querySelector('.navbar');
     const startWebcamBtn = document.getElementById('start-webcam');
@@ -209,7 +214,8 @@
     const webcamOverlay = document.getElementById('webcam-overlay');
     const webcamPlaceholder = document.getElementById('webcam-placeholder');
     const peopleCountElement = document.getElementById('people-count');
-    // 🔹 Eventos para iniciar e parar webcam
+    const ModePeopleCountElement = document.getElementById('people-mode');
+   
 startWebcamBtn.addEventListener('click', startWebcam);
 stopWebcamBtn.addEventListener('click', stopWebcam);
 
@@ -229,11 +235,11 @@ stopWebcamBtn.addEventListener('click', stopWebcam);
     let model = null;
     let detectionInterval = null;
 
-    // ===== Menu mobile =====
+   
     menuIcon.addEventListener('click', () => { navbar.classList.toggle('active'); });
     window.addEventListener('scroll', () => { document.querySelector('.header').classList.toggle('scrolled', window.scrollY > 50); });
 
-    // ===== Partículas =====
+   
     const canvas = document.getElementById('particleCanvas');
     const ctx = canvas.getContext('2d');
     canvas.width = window.innerWidth;
@@ -283,13 +289,13 @@ stopWebcamBtn.addEventListener('click', stopWebcam);
 
     // ===== Webcam & IA =====
 
-// Carrega o modelo COCO-SSD
+
 async function loadModel() {
     model = await cocoSsd.load();
     console.log("Modelo COCO-SSD carregado!");
 }
 
-// Detecta pessoas em tempo real, centralizando e ajustando a caixa
+
 async function detectPeople() {
     if (!model || !webcam.srcObject) return;
 
@@ -335,6 +341,14 @@ async function detectPeople() {
 
     peopleCount = detectedCount;
     peopleCountElement.textContent = peopleCount;
+    if(peopleCount<=2){
+        ModePeopleCountElement.textContent = "Baixo";
+    }else if(peopleCount>2 && peopleCount<=5){
+        ModePeopleCountElement.textContent = "Médio";
+    }else{
+        ModePeopleCountElement.textContent = "Alto";
+    }
+    
 }
 
 // Polyfill para roundRect (cantos arredondados)
@@ -392,6 +406,7 @@ function stopWebcam() {
         clearInterval(detectionInterval);
         peopleCount = 0;
         peopleCountElement.textContent = "0";
+        ModePeopleCountElement.textContent = "Desligado" 
     }
 }
 
